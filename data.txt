@@ -1,0 +1,4 @@
+
+npx clear-npx-cache
+
+npm cache clean --force
