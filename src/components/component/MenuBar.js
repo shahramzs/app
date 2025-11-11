@@ -94,7 +94,7 @@ export function MenuBar() {
         </MenubarMenu>
         <MenubarMenu>
           <Dialog open={openMain} onOpenChange={setOpenMain}>
-            <DialogTrigger>
+            <DialogTrigger variant="outline" className="cursor-pointer">
               <Button variant="outline" className="cursor-pointer">
                 <User2 />
                 <p className="text-sm text-gray-500">ورود به اکران</p>
