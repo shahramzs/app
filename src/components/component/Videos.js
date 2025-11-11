@@ -13,7 +13,7 @@ export default function Videos() {
   return (
     <div className="flex flex-row flex-wrap justify-center gap-2">
       {videos.map((video, i) => (
-        <Card className="mt-2 w-full h-[280px] lg:w-[320px] md:w-[360px] sm:w-[410px] xs:w-[420px] ">
+        <Card className="mt-2 w-full h-[280px] lg:w-[360px] md:w-[380px] sm:w-[410px] xs:w-[420px] ">
           <CardContent>
             <p>Card Content</p>
           </CardContent>
