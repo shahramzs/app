@@ -4,17 +4,18 @@ import { videos } from "@/utils/Constants";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check } from "lucide-react";
+
 export default function Videos() {
   return (
     <div
       className="
-    grid gap-3 mt-2
-    grid-cols-[repeat(auto-fit,minmax(260px,1fr))]
-    justify-items-center
-  "
+      grid gap-3 mt-2
+      grid-cols-[repeat(auto-fit,minmax(260px,1fr))]
+      justify-items-center
+    "
     >
       {videos.map((video, i) => (
-        <div key={i} className="w-full max-w-full overflow-hidden ">
+        <div className="w-full max-w-full bg-transparent border-0 shadow-none hover:scale-[1.02] transition-transform duration-200 cursor-pointer">
           <div className="p-0 relative w-full h-50">
             <Image
               src={video.image}

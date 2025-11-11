@@ -1,3 +1,4 @@
+"use client";
 import {
   Menubar,
   MenubarCheckboxItem,
@@ -14,36 +15,28 @@ import {
   MenubarTrigger,
 } from "../ui/menubar";
 import { Input } from "@/components/ui/input";
-import { Settings, Search } from "lucide-react";
+import { Settings, Search, User2, Download } from "lucide-react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 
 export function MenuBar() {
+  const { theme, setTheme } = useTheme();
   return (
     <Menubar className="w-full flex justify-between h-[50px]">
       <div className="flex items-center gap-2">
         <MenubarMenu>
-          <MenubarTrigger>File</MenubarTrigger>
-          <MenubarContent>
-            <MenubarItem>
-              New Tab <MenubarShortcut>⌘T</MenubarShortcut>
-            </MenubarItem>
-            <MenubarItem>
-              New Window <MenubarShortcut>⌘N</MenubarShortcut>
-            </MenubarItem>
-            <MenubarItem disabled>New Incognito Window</MenubarItem>
-            <MenubarSeparator />
-            <MenubarSub>
-              <MenubarSubTrigger>Share</MenubarSubTrigger>
-              <MenubarSubContent>
-                <MenubarItem>Email link</MenubarItem>
-                <MenubarItem>Messages</MenubarItem>
-                <MenubarItem>Notes</MenubarItem>
-              </MenubarSubContent>
-            </MenubarSub>
-            <MenubarSeparator />
-            <MenubarItem>
-              Print... <MenubarShortcut>⌘P</MenubarShortcut>
-            </MenubarItem>
-          </MenubarContent>
+          <Image
+            src="/images/logo.png"
+            alt="logo"
+            width={35}
+            height={35}
+            unoptimized
+            className="mr-2"
+          />
+        </MenubarMenu>
+        <MenubarMenu>
+          <p className="text-md font-italic text-xl">اکران</p>
         </MenubarMenu>
       </div>
       <MenubarMenu>
@@ -59,53 +52,18 @@ export function MenuBar() {
           />
         </div>
       </MenubarMenu>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-5">
         <MenubarMenu>
-          <MenubarTrigger className="mr-auto">Edit</MenubarTrigger>
-          <MenubarContent>
-            <MenubarItem>
-              Undo <MenubarShortcut>⌘Z</MenubarShortcut>
-            </MenubarItem>
-            <MenubarItem>
-              Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
-            </MenubarItem>
-            <MenubarSeparator />
-            <MenubarSub>
-              <MenubarSubTrigger>Find</MenubarSubTrigger>
-              <MenubarSubContent>
-                <MenubarItem>Search the web</MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem>Find...</MenubarItem>
-                <MenubarItem>Find Next</MenubarItem>
-                <MenubarItem>Find Previous</MenubarItem>
-              </MenubarSubContent>
-            </MenubarSub>
-            <MenubarSeparator />
-            <MenubarItem>Cut</MenubarItem>
-            <MenubarItem>Copy</MenubarItem>
-            <MenubarItem>Paste</MenubarItem>
-          </MenubarContent>
+          <Button className="cursor-pointer">
+            <Download className="cursor-pointer" />
+          </Button>
         </MenubarMenu>
 
         <MenubarMenu>
-          <MenubarTrigger className="mr-auto">View</MenubarTrigger>
-          <MenubarContent>
-            <MenubarCheckboxItem>Always Show Bookmarks Bar</MenubarCheckboxItem>
-            <MenubarCheckboxItem checked>
-              Always Show Full URLs
-            </MenubarCheckboxItem>
-            <MenubarSeparator />
-            <MenubarItem inset>
-              Reload <MenubarShortcut>⌘R</MenubarShortcut>
-            </MenubarItem>
-            <MenubarItem disabled inset>
-              Force Reload <MenubarShortcut>⇧⌘R</MenubarShortcut>
-            </MenubarItem>
-            <MenubarSeparator />
-            <MenubarItem inset>Toggle Fullscreen</MenubarItem>
-            <MenubarSeparator />
-            <MenubarItem inset>Hide Sidebar</MenubarItem>
-          </MenubarContent>
+          <Button variant="outline" className="cursor-pointer">
+            <User2 />
+            <p className="text-sm text-gray-500">ورود به اکران</p>
+          </Button>
         </MenubarMenu>
 
         <MenubarMenu>
@@ -121,7 +79,31 @@ export function MenuBar() {
             <MenubarSeparator />
             <MenubarItem inset>Edit...</MenubarItem>
             <MenubarSeparator />
-            <MenubarItem inset>Add Profile...</MenubarItem>
+            <MenubarItem inset>
+              {theme == "light" ? (
+                <Button variant="outline" onClick={() => setTheme("dark")}>
+                  <Image
+                    src="/images/moon.png"
+                    width={20}
+                    height={20}
+                    unoptimized
+                    alt="mode"
+                  />
+                  <p>dark</p>
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={() => setTheme("light")}>
+                  <Image
+                    src="/images/sun.png"
+                    width={20}
+                    height={20}
+                    unoptimized
+                    alt="mode"
+                  />
+                  <p>light</p>
+                </Button>
+              )}
+            </MenubarItem>
           </MenubarContent>
         </MenubarMenu>
       </div>
