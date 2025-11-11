@@ -8,14 +8,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { videos } from "@/utils/Constants";
+import Image from "next/image";
 
 export default function Videos() {
   return (
-    <div className="flex flex-row flex-wrap justify-center gap-2">
+    <div
+      className="
+    grid gap-3 mt-2
+    grid-cols-[repeat(auto-fit,minmax(260px,1fr))]
+    justify-items-center
+  "
+    >
       {videos.map((video, i) => (
-        <Card className="mt-2 w-full h-[280px] lg:w-[360px] md:w-[380px] sm:w-[410px] xs:w-[420px] ">
+        <Card key={i} className="w-full max-w-full h-50">
           <CardContent>
-            <p>Card Content</p>
+            <Image
+              src={video.image}
+              alt={video.title}
+              width={100}
+              height={100}
+            />
           </CardContent>
           <CardFooter>
             <p>Card Footer</p>
@@ -25,4 +37,3 @@ export default function Videos() {
     </div>
   );
 }
- 

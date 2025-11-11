@@ -12,7 +12,7 @@ export default function Home() {
         <main className=" flex-1 p-2">
           <MenuBar />
           <Chips />
-          <h7 className="text-md font-bold">ویدیئو ها</h7>
+          <h2 className="text-md font-bold">ویدیئو ها</h2>
           <Videos />
         </main>
       </div>
