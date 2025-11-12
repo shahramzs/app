@@ -218,7 +218,7 @@ export function AppSidebar() {
                 {active === id && (
                   <motion.div
                     layoutId="underline"
-                    className="absolute -bottom-1 w-6 h-[2px] bg-blue-600 rounded-full"
+                    className="absolute -bottom-1 w-6 h-0.5 bg-blue-600 rounded-full"
                     transition={{ type: "spring", stiffness: 250, damping: 20 }}
                   />
                 )}

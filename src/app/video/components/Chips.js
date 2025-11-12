@@ -3,6 +3,7 @@ import { motion, useMotionValue, animate, useTransform } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { categories } from "@/utils/Constants";
+import { Button } from "@/components/ui/button";
 
 export default function Chips() {
   const x = useMotionValue(0);
@@ -54,7 +55,7 @@ export default function Chips() {
       {/* لیست چیپ‌ها */}
       <motion.ul
         ref={containerRef}
-        className="flex gap-2 py-2 cursor-grab active:cursor-grabbing"
+        className="flex justify-between gap-2 py-2 cursor-grab active:cursor-grabbing"
         style={{ x: xWrap }}
         drag="x"
         dragElastic={0.1}
@@ -66,7 +67,7 @@ export default function Chips() {
             style={{ width: chipWidth }}
             whileTap={{ scale: 0.95 }}
           >
-            <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-300 rounded-full text-sm font-medium hover:bg-gray-400 transition whitespace-nowrap">
+            <div className="flex items-center justify-center gap-2 px-4 py-2 bg-white-300 border-1 border-gray-300 rounded-sm text-sm font-medium hover:bg-gray-100 transition whitespace-nowrap">
               {item.icon}
               <span>{item.name}</span>
             </div>

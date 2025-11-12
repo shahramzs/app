@@ -8,13 +8,13 @@ import VideoDetails from "./components/VideoDetails";
 
 export default function Home() {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <SidebarWithBackdrop />
-
       <div className="relative w-full overflow-hidden">
-        <main className="flex-1 p-2 mr-13">
+        <div className="fixed top-0 left-0 w-full z-50">
           <MenuBar />
-          <Chips />
+        </div>
+        <main className="flex-1 p-2 mt-12 mr-11">
           <VideoDetails />
         </main>
       </div>
@@ -23,10 +23,10 @@ export default function Home() {
 }
 
 function SidebarWithBackdrop() {
-  const { open } = useSidebar();
+  const { open, isMobile } = useSidebar();
   return (
     <>
-      <div className="fixed right-0 top-0 z-150 h-full">
+      <div className="fixed right-0 top-0 z-150 h-full ">
         <AppSidebar variant="floating" collapsible="icon" />
       </div>
       {open && (

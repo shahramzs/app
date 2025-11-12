@@ -66,9 +66,9 @@ export default function Chips() {
             style={{ width: chipWidth }}
             whileTap={{ scale: 0.95 }}
           >
-            <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-300 rounded-full text-sm font-medium hover:bg-gray-400 transition whitespace-nowrap">
+            <div className="flex items-center justify-center gap-2 px-2 py-2 bg-gray-300 rounded-full text-sm font-medium hover:bg-gray-400 transition whitespace-nowrap">
               {item.icon}
-              <span>{item.name}</span>
+              <span className="text-sm">{item.name}</span>
             </div>
           </motion.li>
         ))}

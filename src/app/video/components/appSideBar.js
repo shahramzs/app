@@ -91,7 +91,12 @@ export function AppSidebar() {
   return (
     <main className="relative">
       {!isMobile ? (
-        <Sidebar side="right" variant="floating" collapsible="icon">
+        <Sidebar
+          side="right"
+          variant="floating"
+          collapsible="icon"
+          className="h-[95%] mt-10 -mr-2"
+        >
           <SidebarTrigger
             className={
               state == "collapsed"
