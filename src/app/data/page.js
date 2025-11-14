@@ -12,7 +12,7 @@ export default function Home() {
         <MenuBar />
       </div>
       {/* محتوای اصلی */}
-      <div className="w-[90%] h-[80%] mt-16">
+      <div className="w-[90%] h-[90%] mt-12">
         <Card className="w-full h-full flex ">
           <CardContent className="flex flex-1 p-4 overflow-y-auto">
             <div className="w-full h-full transition-colors duration-300 p-2">
@@ -23,7 +23,7 @@ export default function Home() {
                   <Form />
                 </div>
                 {/* ستون سمت چپ (کوچک‌تر) */}
-                <div className="md:col-span-2 flex items-center justify-center">
+                <div className="md:col-span-2 flex flex-col w-full h-full items-center justify-center overflow-y-auto custom-scrollbar">
                   <VideoUploading />
                 </div>
               </div>

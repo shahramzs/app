@@ -33,13 +33,14 @@ export default function VideoUploading() {
         <p className="text-xs text-red-600 mr-2">بارگزاری متوقف شده </p>
         <p className="text-xs ml-2">29.59 مگ از 591.72 مگ</p>
       </div>
-      <div className="w-full h-[60%] bg-black relative">
+      <div className="w-full bg-black relative">
         <ReactPlayer
           url="/videos/sample.mp4"
           playing={false}
           controls={false}
           width="100%"
           height="100%"
+          style={{ height: "200px" }}
         />
         <div className="absolute top-0 left-0 mt-2 bg-gray-300 rounded p-1 ml-2 hover:bg-gray-500">
           <DropdownMenu>
@@ -60,7 +61,7 @@ export default function VideoUploading() {
 
       <div className="w-96 relative mt-0.5">
         {/* نوار پیشرفت */}
-        <Progress value={progress} className="w-116 h-2" />
+        <Progress value={progress} className="w-113 h-2" />
 
         {/* Tooltip سفارشی که روی نوار حرکت می‌کند */}
         <div
@@ -73,22 +74,28 @@ export default function VideoUploading() {
         </div>
       </div>
       <div className="mt-5">
-        <Button variant="outline">
+        <Label htmlFor="picture">
           بارگزاری تصویر <Upload />
-        </Button>
+        </Label>
+        <Input id="picture" type="file" />
       </div>
-      <hr className="w-full h-2 mt-0.5" />
-      <div className="flex items-center space-x-2">
+      <hr className="w-full h-2 mt-1" />
+      <div
+        dir="ltr"
+        className="flex flex-row justify-between gap-3 items-center space-x-2 mt-5"
+      >
         <Switch id="airplane-mode" />
         <Label htmlFor="airplane-mode">واترمارک ویدیو</Label>
       </div>
-      <div className="grid w-full max-w-sm items-center gap-3">
+      <hr className="w-full h-2 mt-1" />
+      <div className="grid w-full max-w-full items-center gap-3 mt-2">
         <Label htmlFor="picture">فایل زیرنویس</Label>
         <Input id="picture" type="file" />
       </div>
-      <div>
+      <hr className="w-full h-2 mt-1" />
+      <div className="mt-1">
         <Select>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger dir="rtl" className="w-full">
             <SelectValue placeholder="انتخاب زمان انتشار" />
           </SelectTrigger>
           <SelectContent>
@@ -98,7 +105,7 @@ export default function VideoUploading() {
           </SelectContent>
         </Select>
       </div>
-      <div className="flex flex-row justify-between gap-3">
+      <div className="flex flex-row justify-between gap-3 mt-3">
         <Button variant="outline">انصراف</Button>
         <Button>انتشار ویدیو</Button>
       </div>
