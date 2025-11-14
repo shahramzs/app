@@ -17,7 +17,7 @@ import {
 
 export default function Form() {
   return (
-    <div className="flex flex-col gap-10 w-full h-full">
+    <div className="flex flex-col gap-7 w-full h-full -mt-2">
       {/* فیلد عنوان ویدیو */}
       <div className="flex flex-col gap-2 w-full">
         <div className="grid w-full max-w-full items-start gap-2">

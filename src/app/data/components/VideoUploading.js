@@ -61,7 +61,10 @@ export default function VideoUploading() {
 
       <div className="w-96 relative mt-0.5">
         {/* نوار پیشرفت */}
-        <Progress value={progress} className="w-113 h-2" />
+        <Progress
+          value={progress}
+          className="w-111 h-2 items-center justify-center"
+        />
 
         {/* Tooltip سفارشی که روی نوار حرکت می‌کند */}
         <div
