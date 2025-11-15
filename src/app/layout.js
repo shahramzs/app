@@ -1,15 +1,26 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
+import localFont from "next/font/local";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const medium = localFont({
+  src: "../../public/fonts/IRANSans_Medium.ttf",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const light = localFont({
+  src: "../../public/fonts/IRANSans_Light.ttf",
+});
+
+const ultraLight = localFont({
+  src: "../../public/fonts/IRANSans_UltraLight.ttf",
+});
+
+const black = localFont({
+  src: "../../public/fonts/IRANSans_Black.ttf",
+});
+
+const iranSans = localFont({
+  src: "../../public/fonts/IRANSans.ttf",
 });
 
 export const metadata = {
@@ -37,7 +48,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fa" dir="rtl">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${medium.className} ${light.className} ${ultraLight.className} ${iranSans.className} ${black.className} antialiased`}
       >
         <ThemeProvider
           attribute="class"

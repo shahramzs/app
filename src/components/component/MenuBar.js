@@ -24,19 +24,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Search, User2, Download } from "lucide-react";
+import { Settings, Search, User2, Download, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { useState } from "react";
+import ApiService from "@/api/apiService";
 
 export function MenuBar() {
   const { theme, setTheme } = useTheme();
   const [openMain, setOpenMain] = useState(false);
   const [openLogin, setOpenLogin] = useState(false);
   const [openPassword, setOpenPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [password, setPassword] = useState("");
+  const [honeyPot, setHoneyPot] = useState("");
+  const [error, setError] = useState(false);
 
   const handleGoToLogin = () => {
     setOpenMain(false);
@@ -54,6 +62,23 @@ export function MenuBar() {
     setOpenMain(false);
     setOpenLogin(false);
     setTimeout(() => setOpenPassword(true), 150);
+  };
+
+  const register = () => {
+    if (honeyPot !== "") {
+      //Bot detector
+      setError(true);
+    }
+    if ([username, email, mobile, password].every((x) => x.trim() !== "")) {
+      ApiService.SignUp(username, email, mobile, password, (res) => {
+        if (res.data == "User inserted successfully") {
+          setOpenMain(false);
+          setOpenLogin(true);
+        }
+      });
+    } else {
+      setError(true);
+    }
   };
 
   return (
@@ -115,20 +140,55 @@ export function MenuBar() {
               </DialogHeader>
               <div className="grid gap-4">
                 <div className="grid gap-3">
+                  <Label htmlFor="username">نام کاربری</Label>
+                  <Input
+                    id="username"
+                    name="Username"
+                    placeholder="john doe"
+                    onChange={(e) => setUsername(e.target.value)}
+                    value={username}
+                  />
+                </div>
+                <div className="grid gap-3">
                   <Label htmlFor="name-1">ایمیل</Label>
                   <Input
                     id="email"
                     name="پست الکترونیکی"
                     placeholder="john.doe@gmail.com"
+                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
                   />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="username-1">شماره موبایل</Label>
-                  <Input id="mobile" name="mobile" placeholder="09125910037" />
+                  <Input
+                    id="mobile"
+                    name="mobile"
+                    placeholder="09125910037"
+                    onChange={(e) => setMobile(e.target.value)}
+                    value={mobile}
+                  />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="username-1">کلمه عبور</Label>
-                  <Input id="password" name="password" placeholder="********" />
+                  <Input
+                    id="password"
+                    name="password"
+                    placeholder="********"
+                    onChange={(e) => setPassword(e.target.value)}
+                    value={password}
+                  />
+                </div>
+                {/* HONEYPOT FIELD */}
+                <div style={{ position: "absolute", left: "-9999px" }}>
+                  <input
+                    type="text"
+                    name="website"
+                    autoComplete="off"
+                    tabIndex="-1"
+                    onChange={(e) => setHoneyPot(e.target.value)}
+                    value={honeyPot}
+                  />
                 </div>
                 <div className="grid gap-3">
                   <div className="flex flex-row justify-between gap-5">
@@ -149,7 +209,9 @@ export function MenuBar() {
                 <DialogClose asChild>
                   <Button variant="outline">لغو</Button>
                 </DialogClose>
-                <Button type="submit">ثبت نام</Button>
+                <Button type="submit" onClick={register}>
+                  ثبت نام
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -283,6 +345,38 @@ export function MenuBar() {
               <Button variant="outline">بازگشت</Button>
             </DialogClose>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Dialog قابل کنترل با استیت */}
+      <Dialog open={error} onOpenChange={setError}>
+        <DialogContent className="space-y-4">
+          <DialogHeader>
+            <DialogTitle className="items-center justify-center self-center">
+              وجود خطا
+            </DialogTitle>
+            <DialogDescription className="items-center justify-center self-center">
+              موارد زیر را بررسی کنید
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Alert داخل دیالوگ */}
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>خطا در ثبت‌نام کاربر</AlertTitle>
+            <AlertDescription>
+              <p>لطفا همهٔ فیلدها را پر نمایید:</p>
+              <ul className="list-inside list-disc text-sm mt-2">
+                <li>پست الکترونیکی خود را دقیق وارد نمایید</li>
+                <li>شماره موبایل را به درستی همراه با کد وارد نمایید</li>
+                <li>یک کلمه عبور مناسب انتخاب نمایید</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+
+          {/* دکمه بستن */}
+          <Button variant="outline" onClick={() => setError(false)}>
+            بستن
+          </Button>
         </DialogContent>
       </Dialog>
     </Menubar>
