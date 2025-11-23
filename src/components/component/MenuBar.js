@@ -24,6 +24,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +46,8 @@ export function MenuBar() {
   const [password, setPassword] = useState("");
   const [honeyPot, setHoneyPot] = useState("");
   const [error, setError] = useState(false);
+  const now = new Date().toLocaleDateString("fa-IR");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleGoToLogin = () => {
     setOpenMain(false);
@@ -64,17 +67,45 @@ export function MenuBar() {
     setTimeout(() => setOpenPassword(true), 150);
   };
 
+  // Sign up
   const register = () => {
+    setUsername("");
+    setEmail("");
+    setPassword("");
+    setMobile("");
     if (honeyPot !== "") {
       //Bot detector
       setError(true);
     }
     if ([username, email, mobile, password].every((x) => x.trim() !== "")) {
       ApiService.SignUp(username, email, mobile, password, (res) => {
-        if (res.data == "User inserted successfully") {
+        console.log("data", res);
+        const response = res.data;
+        if (response == "User inserted successfully") {
           setOpenMain(false);
           setOpenLogin(true);
+          toast.success("شما با موفقیت ثبت نام کردید.", {
+            description: now.toLocaleString(),
+            action: {
+              label: "ورود به سیستم",
+              onClick: () => setOpenLogin(true),
+            },
+          });
+        } else {
+          setError(true);
+          setErrorMessage(response);
         }
+      });
+    } else {
+      setError(true);
+    }
+  };
+
+  //Sign In
+  const signin = () => {
+    if ([email, mobile, password].every((x) => x.trim() !== "")) {
+      ApiService.SignIn(email, mobile, password, (res) => {
+        console.log(res);
       });
     } else {
       setError(true);
@@ -279,6 +310,16 @@ export function MenuBar() {
                 id="login-email"
                 type="email"
                 placeholder="you@email.com"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="login-mobile">شماره موبایل</Label>
+              <Input
+                id="login-mobile"
+                type="text"
+                placeholder="091**********"
+                onChange={(e) => setMobile(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
@@ -287,9 +328,10 @@ export function MenuBar() {
                 id="login-password"
                 type="password"
                 placeholder="********"
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <Button>ورود</Button>
+            <Button onClick={signin}>ورود</Button>
             <div className="flex flex-row justify-between gap-5">
               <Button variant="Ghost" onClick={handleGoToMain}>
                 ثبت نام در اکران
@@ -364,6 +406,7 @@ export function MenuBar() {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>خطا در ثبت‌نام کاربر</AlertTitle>
             <AlertDescription>
+              <p>{errorMessage}</p>
               <p>لطفا همهٔ فیلدها را پر نمایید:</p>
               <ul className="list-inside list-disc text-sm mt-2">
                 <li>پست الکترونیکی خود را دقیق وارد نمایید</li>

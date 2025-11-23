@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import localFont from "next/font/local";
+import { Toaster } from "@/components/ui/sonner";
 
 const medium = localFont({
   src: "../../public/fonts/IRANSans_Medium.ttf",
@@ -56,7 +57,10 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <main>{children}</main>
+          <main>
+            <Toaster />
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>
