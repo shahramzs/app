@@ -91,32 +91,39 @@ export function AppSidebar() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
 
-  const getEmailCookie = () => {
-    Helper.getStorage("email").then((result) => {
-      setEmail(result);
-    });
+  const getEmailCookie = async () => {
+    setEmail(await Helper.getStorage("email"));
   };
 
   const deleteCookies = () => {
     Helper.deleteAllStorage();
+    window.location.replace("/");
+  };
+
+  const getUsernameCookie = async () => {
+    const username = await Helper.getStorage("username");
+    if (username !== null) {
+      setCookie(true);
+      setUsername(username);
+    } else {
+      setCookie(false);
+    }
   };
 
   useEffect(() => {
-    Helper.getStorage("username").then((result) => {
-      if (result !== null) {
-        setCookie(true);
-        setUsername(result);
-      } else {
-        setCookie(false);
-      }
-    });
+    getUsernameCookie();
     getEmailCookie();
   }, []);
 
   return (
     <main className="relative">
       {!isMobile ? (
-        <Sidebar side="right" variant="floating" collapsible="icon">
+        <Sidebar
+          side="right"
+          variant="floating"
+          collapsible="icon"
+          className="h-[87%] mt-23 -mr-2"
+        >
           <SidebarTrigger
             className={
               state == "collapsed"

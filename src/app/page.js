@@ -10,9 +10,12 @@ export default function Home() {
       <AppSidebar />
       <div className="w-full overflow-hidden">
         <main className=" flex-1 p-2">
-          <MenuBar />
-          <Chips />
-          <h2 className="text-md font-bold">ویدیئو ها</h2>
+          <div className="fixed top-0 left-0 w-full z-50 bg-white">
+            <MenuBar />
+            <Chips />
+          </div>
+
+          <h2 className="text-md font-bold mt-23">ویدیئو ها</h2>
           <Videos />
         </main>
       </div>

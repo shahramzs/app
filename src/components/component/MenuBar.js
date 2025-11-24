@@ -116,6 +116,7 @@ export function MenuBar() {
             "token",
             response.token,
           ];
+          window.location.replace("/");
           Helper.setStorages(users);
           setOpenLogin(false);
           setCookies(true);
@@ -129,21 +130,22 @@ export function MenuBar() {
     }
   };
 
-  const getEmailCookie = () => {
-    Helper.getStorage("email").then((result) => {
-      setEmailCookie(result);
-    });
+  const getEmailCookie = async () => {
+    setEmailCookie(await Helper.getStorage("email"));
+  };
+
+  const getUsernameCookie = async () => {
+    const result = await Helper.getStorage("username");
+    if (result !== null) {
+      setChangeMenu(true);
+      setUsernameCookie(result);
+    } else {
+      setChangeMenu(false);
+    }
   };
 
   useEffect(() => {
-    Helper.getStorage("username").then((result) => {
-      if (result !== null) {
-        setChangeMenu(true);
-        setUsernameCookie(result);
-      } else {
-        setChangeMenu(false);
-      }
-    });
+    getUsernameCookie();
     getEmailCookie();
   }, []);
 
