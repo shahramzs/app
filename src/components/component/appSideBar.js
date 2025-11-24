@@ -35,6 +35,7 @@ import {
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Helper } from "@/utils/Helper";
 
 // Menu items.
 const items = [
@@ -86,7 +87,31 @@ export function AppSidebar() {
     toggleSidebar,
   } = useSidebar();
   const [active, setActive] = useState("home");
-  useEffect(() => {}, []);
+  const [cookie, setCookie] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+
+  const getEmailCookie = () => {
+    Helper.getStorage("email").then((result) => {
+      setEmail(result);
+    });
+  };
+
+  const deleteCookies = () => {
+    Helper.deleteAllStorage();
+  };
+
+  useEffect(() => {
+    Helper.getStorage("username").then((result) => {
+      if (result !== null) {
+        setCookie(true);
+        setUsername(result);
+      } else {
+        setCookie(false);
+      }
+    });
+    getEmailCookie();
+  }, []);
 
   return (
     <main className="relative">
@@ -150,32 +175,61 @@ export function AppSidebar() {
             </SidebarGroup>
           </SidebarContent>
           <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton>
-                      <User2 /> Username
-                      <ChevronUp className="ml-auto" />
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    side="top"
-                    className="w-[--radix-popper-anchor-width]"
-                  >
-                    <DropdownMenuItem>
-                      <span>Account</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <span>Billing</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <span>Sign out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
-            </SidebarMenu>
+            {cookie ? (
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuButton>
+                        <User2 /> {email}
+                        <ChevronUp className="ml-auto" />
+                      </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      side="top"
+                      className="w-[--radix-popper-anchor-width]"
+                    >
+                      <DropdownMenuItem>
+                        <span>Account</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <span>Billing</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={deleteCookies}>
+                        <span>Sign out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            ) : (
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuButton>
+                        <User2 /> Username
+                        <ChevronUp className="ml-auto" />
+                      </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      side="top"
+                      className="w-[--radix-popper-anchor-width]"
+                    >
+                      <DropdownMenuItem>
+                        <span>Account</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <span>Billing</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <span>Sign out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            )}
           </SidebarFooter>
         </Sidebar>
       ) : (
@@ -183,7 +237,7 @@ export function AppSidebar() {
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 md:hidden shadow-lg"
+          className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 md:hidden shadow-lg z-100"
         >
           <ul className="flex justify-around items-center py-2">
             {items.map(({ id, icon: Icon, label }) => (

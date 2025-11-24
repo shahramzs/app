@@ -12,8 +12,6 @@ import {
 } from "cookies-next/client";
 import { Cryptography } from "./Cryptography";
 
-
-
 export class Helper {
   static password = "jksd%lfjdkfjd984903*8940dft(pp-)254545=$-=-a678o+%";
 
@@ -21,15 +19,6 @@ export class Helper {
     const encryptedValue = await Cryptography.Encrypt(value, this.password);
     setCookie(key, encryptedValue);
   }
-
-  // static async setStorages(array) {
-  //   for (let i = 0; i < array.length; i++) {
-  //     console.log("key = " + array[i], "value = " + array[i + 1]);
-  //     setCookie(array[i], array[i + 1]);
-  //     i += 1;
-  //   }
-  //   return "ok";
-  // }
 
   static async setStorages(array) {
     for (let i = 0; i < array.length; i += 2) {
@@ -53,9 +42,9 @@ export class Helper {
     }
   }
 
-  static getAllStorage = () => {
+  static async getAllStorage() {
     return getCookies();
-  };
+  }
 
   static checkStorage = (name) => {
     return hasCookie(name);
@@ -68,9 +57,8 @@ export class Helper {
     const array = [
       "token",
       "username",
-      "fname",
-      "lname",
       "email",
+      "mobile",
       "last_joined",
       "last_login",
     ];

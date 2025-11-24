@@ -32,8 +32,9 @@ import { Settings, Search, User2, Download, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ApiService from "@/api/apiService";
+import { Helper } from "@/utils/Helper";
 
 export function MenuBar() {
   const { theme, setTheme } = useTheme();
@@ -48,6 +49,9 @@ export function MenuBar() {
   const [error, setError] = useState(false);
   const now = new Date().toLocaleDateString("fa-IR");
   const [errorMessage, setErrorMessage] = useState("");
+  const [changeMenu, setChangeMenu] = useState(false);
+  const [usernameCookie, setUsernameCookie] = useState("");
+  const [emailCookie, setEmailCookie] = useState("");
 
   const handleGoToLogin = () => {
     setOpenMain(false);
@@ -69,17 +73,12 @@ export function MenuBar() {
 
   // Sign up
   const register = () => {
-    setUsername("");
-    setEmail("");
-    setPassword("");
-    setMobile("");
     if (honeyPot !== "") {
       //Bot detector
       setError(true);
     }
     if ([username, email, mobile, password].every((x) => x.trim() !== "")) {
       ApiService.SignUp(username, email, mobile, password, (res) => {
-        console.log("data", res);
         const response = res.data;
         if (response == "User inserted successfully") {
           setOpenMain(false);
@@ -105,12 +104,48 @@ export function MenuBar() {
   const signin = () => {
     if ([email, mobile, password].every((x) => x.trim() !== "")) {
       ApiService.SignIn(email, mobile, password, (res) => {
-        console.log(res);
+        const response = res.data;
+        if (typeof response != "string") {
+          const users = [
+            "username",
+            response.username,
+            "email",
+            response.email,
+            "mobile",
+            response.mobile,
+            "token",
+            response.token,
+          ];
+          Helper.setStorages(users);
+          setOpenLogin(false);
+          setCookies(true);
+        } else {
+          setError(true);
+          setErrorMessage(response);
+        }
       });
     } else {
       setError(true);
     }
   };
+
+  const getEmailCookie = () => {
+    Helper.getStorage("email").then((result) => {
+      setEmailCookie(result);
+    });
+  };
+
+  useEffect(() => {
+    Helper.getStorage("username").then((result) => {
+      if (result !== null) {
+        setChangeMenu(true);
+        setUsernameCookie(result);
+      } else {
+        setChangeMenu(false);
+      }
+    });
+    getEmailCookie();
+  }, []);
 
   return (
     <Menubar className="w-full flex justify-between h-[50px]">
@@ -148,105 +183,125 @@ export function MenuBar() {
             <Download className="cursor-pointer" />
           </Button>
         </MenubarMenu>
-        <MenubarMenu>
-          <Dialog open={openMain} onOpenChange={setOpenMain}>
-            <DialogTrigger variant="outline" className="cursor-pointer">
-              <Button variant="outline" className="cursor-pointer">
-                <User2 />
-                <p className="text-sm text-gray-500">ورود به اکران</p>
-              </Button>
-            </DialogTrigger>
-            <DialogContent
-              className="sm:max-w-[425px]"
-              onInteractOutside={(e) => e.preventDefault()}
-              onEscapeKeyDown={(e) => e.preventDefault()}
-            >
-              <DialogHeader>
-                <DialogTitle className="self-center text-xl">
-                  ورود یا ثبت نام در اکران
-                </DialogTitle>
-                <DialogDescription className="self-center">
-                  برای ورود یا ثبت‌نام، اطلاعات کاربری خود را وارد کنید
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4">
-                <div className="grid gap-3">
-                  <Label htmlFor="username">نام کاربری</Label>
-                  <Input
-                    id="username"
-                    name="Username"
-                    placeholder="john doe"
-                    onChange={(e) => setUsername(e.target.value)}
-                    value={username}
-                  />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="name-1">ایمیل</Label>
-                  <Input
-                    id="email"
-                    name="پست الکترونیکی"
-                    placeholder="john.doe@gmail.com"
-                    onChange={(e) => setEmail(e.target.value)}
-                    value={email}
-                  />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="username-1">شماره موبایل</Label>
-                  <Input
-                    id="mobile"
-                    name="mobile"
-                    placeholder="09125910037"
-                    onChange={(e) => setMobile(e.target.value)}
-                    value={mobile}
-                  />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="username-1">کلمه عبور</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    placeholder="********"
-                    onChange={(e) => setPassword(e.target.value)}
-                    value={password}
-                  />
-                </div>
-                {/* HONEYPOT FIELD */}
-                <div style={{ position: "absolute", left: "-9999px" }}>
-                  <input
-                    type="text"
-                    name="website"
-                    autoComplete="off"
-                    tabIndex="-1"
-                    onChange={(e) => setHoneyPot(e.target.value)}
-                    value={honeyPot}
-                  />
-                </div>
-                <div className="grid gap-3">
-                  <div className="flex flex-row justify-between gap-5">
-                    <Button
-                      className="w-[25%]"
-                      variant="Ghost"
-                      onClick={handleGoToLogin}
-                    >
-                      ورود به اکران
-                    </Button>
-                    <Button variant="Ghost" onClick={handleGoToPassword}>
-                      فراموشی رمز ورود
-                    </Button>
+
+        {!changeMenu ? (
+          <MenubarMenu>
+            <Dialog open={openMain} onOpenChange={setOpenMain}>
+              <DialogTrigger variant="outline" className="cursor-pointer">
+                <Button variant="outline" className="cursor-pointer">
+                  <User2 />
+                  <p className="text-sm text-gray-500">ورود به اکران</p>
+                </Button>
+              </DialogTrigger>
+              <DialogContent
+                className="sm:max-w-[425px]"
+                onInteractOutside={(e) => e.preventDefault()}
+                onEscapeKeyDown={(e) => e.preventDefault()}
+              >
+                <DialogHeader>
+                  <DialogTitle className="self-center text-xl">
+                    ورود یا ثبت نام در اکران
+                  </DialogTitle>
+                  <DialogDescription className="self-center">
+                    برای ورود یا ثبت‌نام، اطلاعات کاربری خود را وارد کنید
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4">
+                  <div className="grid gap-3">
+                    <Label htmlFor="username">نام کاربری</Label>
+                    <Input
+                      id="username"
+                      name="Username"
+                      placeholder="john doe"
+                      onChange={(e) => setUsername(e.target.value)}
+                      value={username}
+                    />
+                  </div>
+                  <div className="grid gap-3">
+                    <Label htmlFor="name-1">ایمیل</Label>
+                    <Input
+                      id="email"
+                      name="پست الکترونیکی"
+                      placeholder="john.doe@gmail.com"
+                      onChange={(e) => setEmail(e.target.value)}
+                      value={email}
+                    />
+                  </div>
+                  <div className="grid gap-3">
+                    <Label htmlFor="username-1">شماره موبایل</Label>
+                    <Input
+                      id="mobile"
+                      name="mobile"
+                      placeholder="09125910037"
+                      onChange={(e) => setMobile(e.target.value)}
+                      value={mobile}
+                    />
+                  </div>
+                  <div className="grid gap-3">
+                    <Label htmlFor="username-1">کلمه عبور</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      placeholder="********"
+                      onChange={(e) => setPassword(e.target.value)}
+                      value={password}
+                    />
+                  </div>
+                  {/* HONEYPOT FIELD */}
+                  <div style={{ position: "absolute", left: "-9999px" }}>
+                    <input
+                      type="text"
+                      name="website"
+                      autoComplete="off"
+                      tabIndex="-1"
+                      onChange={(e) => setHoneyPot(e.target.value)}
+                      value={honeyPot}
+                    />
+                  </div>
+                  <div className="grid gap-3">
+                    <div className="flex flex-row justify-between gap-5">
+                      <Button
+                        className="w-[25%]"
+                        variant="Ghost"
+                        onClick={handleGoToLogin}
+                      >
+                        ورود به اکران
+                      </Button>
+                      <Button variant="Ghost" onClick={handleGoToPassword}>
+                        فراموشی رمز ورود
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">لغو</Button>
-                </DialogClose>
-                <Button type="submit" onClick={register}>
-                  ثبت نام
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </MenubarMenu>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">لغو</Button>
+                  </DialogClose>
+                  <Button type="submit" onClick={register}>
+                    ثبت نام
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </MenubarMenu>
+        ) : (
+          <MenubarMenu>
+            <MenubarTrigger>
+              <Button variant="outline">
+                <User2 /> پروفایل
+              </Button>
+            </MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem>{emailCookie}</MenubarItem>
+              <MenubarItem>{usernameCookie}</MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem>Share</MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem>Print</MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+        )}
+
         <MenubarMenu>
           <MenubarTrigger className="mr-auto">
             <Settings />
