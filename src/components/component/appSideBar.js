@@ -122,7 +122,7 @@ export function AppSidebar() {
           side="right"
           variant="floating"
           collapsible="icon"
-          className="h-[87%] mt-23 -mr-2"
+          className="h-[86%] mt-24 -mr-2"
         >
           <SidebarTrigger
             className={

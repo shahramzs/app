@@ -1,13 +1,31 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
+import { Helper } from "@/utils/Helper";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
+import { useFile } from "@/components/component/FileContext";
 
 export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false);
-  const [file, setFile] = useState(null);
+  const router = useRouter();
+  const inputRef = useRef(null);
+  const { setFile } = useFile();
+
+  const getToken = async () => {
+    const token = await Helper.getStorage("token");
+    if (token == null) {
+      // router.push("/");
+      router.back();
+    }
+  };
+
+  useEffect(() => {
+    getToken();
+  }, []);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -22,13 +40,15 @@ export default function UploadPage() {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
+      setFile(e.target.files[0]);
+      router.push("data/");
     }
   };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+      router.push("data/");
     }
   };
 
@@ -53,28 +73,28 @@ export default function UploadPage() {
             >
               <Upload size={80} className="text-gray-400" />
 
-              {file ? (
-                <p className="text-gray-700 text-sm">
-                  فایل انتخاب‌شده:{" "}
-                  <span className="font-medium text-blue-600">{file.name}</span>
-                </p>
-              ) : (
-                <>
-                  <p className="text-gray-600">
-                    فایل‌ ویدیوی خود را اینجا بکشید یا از دکمه زیر انتخاب کنید.
-                  </p>
-                  <Input
-                    id="video"
-                    type="file"
-                    accept="video/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <label htmlFor="video">
-                    <Button as="span">انتخاب ویدیو</Button>
-                  </label>
-                </>
-              )}
+              <p className="text-gray-600">
+                فایل‌ ویدیوی خود را اینجا بکشید یا از دکمه زیر انتخاب کنید.
+              </p>
+              <div className="flex flex-col justify-center items-center">
+                <input
+                  ref={inputRef}
+                  id="video"
+                  type="file"
+                  accept="video/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <label htmlFor="video">
+                  <Button
+                    type="button"
+                    className="cursor-pointer pointer-events-auto"
+                    onClick={() => inputRef.current && inputRef.current.click()}
+                  >
+                    انتخاب ویدیو
+                  </Button>
+                </label>
+              </div>
             </div>
           </CardContent>
 

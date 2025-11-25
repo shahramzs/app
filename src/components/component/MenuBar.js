@@ -35,6 +35,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import ApiService from "@/api/apiService";
 import { Helper } from "@/utils/Helper";
+import { useRouter } from "next/navigation";
 
 export function MenuBar() {
   const { theme, setTheme } = useTheme();
@@ -52,6 +53,7 @@ export function MenuBar() {
   const [changeMenu, setChangeMenu] = useState(false);
   const [usernameCookie, setUsernameCookie] = useState("");
   const [emailCookie, setEmailCookie] = useState("");
+  const router = useRouter();
 
   const handleGoToLogin = () => {
     setOpenMain(false);
@@ -144,6 +146,15 @@ export function MenuBar() {
     }
   };
 
+  const uploadButton = async () => {
+    const token = await Helper.getStorage("token");
+    if (token !== null) {
+      router.push("upload/");
+    } else {
+      setOpenMain(true);
+    }
+  };
+
   useEffect(() => {
     getUsernameCookie();
     getEmailCookie();
@@ -162,10 +173,12 @@ export function MenuBar() {
             className="mr-2"
           />
         </MenubarMenu>
+
         <MenubarMenu>
           <p className="text-md font-italic text-xl">اکران</p>
         </MenubarMenu>
       </div>
+
       <MenubarMenu>
         <div className="sm:flex flex-row items-center hidden">
           <Input
@@ -179,9 +192,10 @@ export function MenuBar() {
           />
         </div>
       </MenubarMenu>
+
       <div className="flex items-center gap-5">
         <MenubarMenu>
-          <Button className="cursor-pointer">
+          <Button className="cursor-pointer" onClick={uploadButton}>
             <Download className="cursor-pointer" />
           </Button>
         </MenubarMenu>

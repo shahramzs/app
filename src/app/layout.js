@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/sonner";
+import { FileProvider } from "@/components/component/FileContext";
 
 const medium = localFont({
   src: "../../public/fonts/IRANSans_Medium.ttf",
@@ -58,8 +59,10 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           <main>
-            <Toaster />
-            {children}
+            <FileProvider>
+              <Toaster />
+              {children}
+            </FileProvider>
           </main>
         </ThemeProvider>
       </body>

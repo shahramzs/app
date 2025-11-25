@@ -14,8 +14,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 
 export default function Form() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [tag, setTag] = useState("");
+  const [saveInList, setSaveInList] = useState("");
+  const [commentSetting, setCommentSetting] = useState("");
+
+
+
   return (
     <div className="flex flex-col gap-7 w-full h-full -mt-2">
       {/* فیلد عنوان ویدیو */}
@@ -26,7 +36,13 @@ export default function Form() {
           </Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Input type="text" id="title" placeholder="عنوان ویدیو" />
+              <Input
+                type="text"
+                id="title"
+                placeholder="عنوان ویدیو"
+                onChange={(e) => setTitle(e.target.value)}
+                value={title}
+              />
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px] leading-relaxed text-sm">
               <p>
@@ -53,6 +69,8 @@ export default function Form() {
               id="description"
               placeholder="توضیحات کوتاه درباره ویدیو بنویسید..."
               className="w-full h-28 p-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+              onChange={(e) => setDescription(e.target.value)}
+              value={description}
             />
           </TooltipTrigger>
           <TooltipContent className="max-w-[300px] leading-relaxed text-sm">
@@ -74,7 +92,7 @@ export default function Form() {
         <Label className="text-black mr-2" htmlFor="description">
           دسته بندی های ویدیو
         </Label>
-        <Select>
+        <Select value={category} onValueChange={(val) => setCategory(val)}>
           <Tooltip>
             <TooltipTrigger asChild>
               <SelectTrigger className="w-full" dir="rtl">
@@ -106,7 +124,7 @@ export default function Form() {
         <Label className="text-black mr-2" htmlFor="description">
           برچسبهای ویدیو
         </Label>
-        <Select>
+        <Select value={tag} onValueChange={(val) => setTag(val)}>
           <Tooltip>
             <TooltipTrigger asChild>
               <SelectTrigger className="w-full" dir="rtl">
@@ -137,7 +155,7 @@ export default function Form() {
         <Label className="text-black mr-2" htmlFor="description">
           ذخیره در لیست پخش
         </Label>
-        <Select>
+        <Select value={saveInList} onValueChange={(val) => setSaveInList(val)}>
           <Tooltip>
             <TooltipTrigger asChild>
               <SelectTrigger className="w-full" dir="rtl">
@@ -168,7 +186,10 @@ export default function Form() {
         <Label className="text-black mr-2" htmlFor="description">
           تنظیمات دیدگاه
         </Label>
-        <Select>
+        <Select
+          value={commentSetting}
+          onValueChange={(val) => setCommentSetting(val)}
+        >
           <Tooltip>
             <TooltipTrigger asChild>
               <SelectTrigger className="w-full" dir="rtl">
