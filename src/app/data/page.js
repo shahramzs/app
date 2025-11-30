@@ -11,6 +11,14 @@ import { useFile } from "@/components/component/FileContext";
 export default function Home() {
   const [cards, setCards] = useState([{ id: 1, video: null }]);
   const { file } = useFile();
+  const [dataForm, setDataForm] = useState({
+    title: "",
+    description: "",
+    category: "",
+    tag: [],
+    saveInList: "",
+    commentSetting: "",
+  });
 
   const handleAddCardClick = () => {
     document.getElementById("videoPicker").click();
@@ -24,6 +32,13 @@ export default function Home() {
       video: video,
     };
     setCards([...cards, newCard]);
+  };
+
+  const handleChildData = (data) => {
+    setDataForm((prev) => ({
+      ...prev,
+      ...data,
+    }));
   };
 
   return (
@@ -40,11 +55,14 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-1 h-full">
                   {/* ستون سمت راست */}
                   <div className="md:col-span-3 flex flex-col w-full h-full overflow-y-auto p-2 custom-scrollbar">
-                    <Form />
+                    <Form onSendData={handleChildData} />
                   </div>
                   {/* ستون سمت چپ */}
                   <div className="md:col-span-2 flex flex-col w-full h-full items-center justify-center overflow-y-auto custom-scrollbar">
-                    <VideoUploading file={file} video={cardIndex.video} />
+                    <VideoUploading
+                      video={cardIndex.video}
+                      data={dataForm}
+                    />
                   </div>
                 </div>
               </div>

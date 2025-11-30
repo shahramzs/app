@@ -24,35 +24,50 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import { useFile } from "@/components/component/FileContext";
 
-export default function VideoUploading({ file, video }) {
+export default function VideoUploading({ video, data }) {
+  const router = useRouter();
   const [videoURL, setVideoURL] = useState(null);
+  const [fileURL, setFileURL] = useState(null);
   const [autoPlay, setAutoPlay] = useState(false);
   const [publishTime, setPublishTime] = useState("");
   const [image, setImage] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [enabled, setEnabled] = useState(false);
-  const router = useRouter();
   const [progress, setProgress] = useState(0);
+  const { file } = useFile();
 
   useEffect(() => {
     if (!file) {
       setVideoURL(null);
       router.push("upload/");
+      return;
     }
 
-    const url = file ? URL.createObjectURL(file) : null;
+    if(!video){
+      setFileURL(null)
+      return
+    }
+
+    // مطمئن شو file instanceof File یا Blob باشد
+    if (!(file instanceof File || file instanceof Blob)) {
+      console.error("file is not a valid File or Blob", file);
+      setVideoURL(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
     setVideoURL(url);
-
-    if (file != null) {
-      setAutoPlay(true);
-    }
+    setAutoPlay(true);
 
     return () => {
       URL.revokeObjectURL(url);
       setVideoURL(null);
     };
-  }, [file]);
+  }, [file, router]);
+
+  console.log("file", file);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -74,17 +89,18 @@ export default function VideoUploading({ file, video }) {
         <p className="text-xs text-red-600 mr-2 hidden">بارگزاری متوقف شده </p>
         <p className="text-xs ml-2 hidden">29.59 مگ از 591.72 مگ</p>
       </div>
-      <div className="w-full bg-black relative">
-        <ReactPlayer
-          url={videoURL}
-          playing={autoPlay}
-          controls={false}
-          width="100%"
-          height="auto"
-          style={{ width: "100%", height: "170px" }}
-          muted
-          loop={true}
-        />
+      <div className="w-full bg-black relative h-[170px]">
+        {videoURL && (
+          <ReactPlayer
+            src={videoURL}
+            playing={autoPlay}
+            controls={false}
+            height={170}
+            width={500}
+            muted
+            loop
+          />
+        )}
         <div className="absolute top-0 left-0 mt-2 bg-gray-300 rounded p-1 ml-2 hover:bg-gray-500">
           <DropdownMenu>
             <DropdownMenuTrigger>

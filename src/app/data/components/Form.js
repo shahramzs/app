@@ -1,3 +1,4 @@
+"use client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -5,7 +6,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -14,17 +14,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import { useState, useEffect } from "react";
 
-export default function Form() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [tag, setTag] = useState("");
-  const [saveInList, setSaveInList] = useState("");
-  const [commentSetting, setCommentSetting] = useState("");
+export default function Form({ onSendData }) {
+  const [value, setValue] = useState("");
+  const [tags, setTags] = useState([]);
 
+  const addTag = (raw) => {
+    const word = String(raw).trim();
+    if (!word) return;
 
+    if (tags.some((t) => t.value === word)) return;
+
+    setTags((prev) => {
+      const newTags = [...prev, word];
+      if (onSendData) onSendData({ tag: newTags.map((t) => t) });
+      return newTags;
+    });
+  };
+
+  const removeTag = (id) => {
+    setTags((prev) => {
+      const newTags = prev.filter((t) => t !== id);
+      if (onSendData) onSendData({ tag: newTags.map((t) => t) });
+      return newTags;
+    });
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      addTag(value);
+      setValue("");
+    }
+
+    if (e.key === "Backspace" && value === "") {
+      setTags((prev) => {
+        const newTags = prev.slice(0, -1);
+        if (onChangeTags) onChangeTags(newTags.map((t) => t));
+        return newTags;
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col gap-7 w-full h-full -mt-2">
@@ -40,8 +73,7 @@ export default function Form() {
                 type="text"
                 id="title"
                 placeholder="عنوان ویدیو"
-                onChange={(e) => setTitle(e.target.value)}
-                value={title}
+                onChange={(e) => onSendData({ title: e.target.value })}
               />
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px] leading-relaxed text-sm">
@@ -69,8 +101,7 @@ export default function Form() {
               id="description"
               placeholder="توضیحات کوتاه درباره ویدیو بنویسید..."
               className="w-full h-28 p-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
-              onChange={(e) => setDescription(e.target.value)}
-              value={description}
+              onChange={(e) => onSendData({ description: e.target.value })}
             />
           </TooltipTrigger>
           <TooltipContent className="max-w-[300px] leading-relaxed text-sm">
@@ -92,7 +123,7 @@ export default function Form() {
         <Label className="text-black mr-2" htmlFor="description">
           دسته بندی های ویدیو
         </Label>
-        <Select value={category} onValueChange={(val) => setCategory(val)}>
+        <Select onValueChange={(val) => onSendData({ category: val })}>
           <Tooltip>
             <TooltipTrigger asChild>
               <SelectTrigger className="w-full" dir="rtl">
@@ -121,33 +152,49 @@ export default function Form() {
 
       {/* فیلد برچسب ها */}
       <div className="flex flex-col gap-2 w-full">
-        <Label className="text-black mr-2" htmlFor="description">
-          برچسبهای ویدیو
-        </Label>
-        <Select value={tag} onValueChange={(val) => setTag(val)}>
+        <div className="grid w-full max-w-full items-start gap-2">
+          <Label className="text-black mr-2" htmlFor="tag">
+            برچسب ها
+          </Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <SelectTrigger className="w-full" dir="rtl">
-                <SelectValue placeholder="برچسب های ویدیو" />
-              </SelectTrigger>
+              <Input
+                type="text"
+                id="tag"
+                placeholder="برچسب های ویدئو"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
             </TooltipTrigger>
             <TooltipContent className="max-w-[300px] leading-relaxed text-sm">
               <p>
-                راهنما می‌توانید ویدیوها را به قسمت‌های کوچک‌تر تقسیم کنید و
-                توجه بیننده را به بخش‌های مورد نظر جلب کنید. کافیست نام و زمان
-                شروع هر قسمت را در توضیحات ویدیو ثبت کنید.
+                از کلمات کلیدی (انگلیسی و فارسی) جذاب و مرتبط با ویدیو استفاده
+                کنید. همچنین یک عنوان معنادار بنویسید تا بیننده موضوع ویدیوی شما
+                را بفهمد.
               </p>
             </TooltipContent>
           </Tooltip>
-          <SelectContent>
-            <SelectItem value="light">Light</SelectItem>
-            <SelectItem value="dark">Dark</SelectItem>
-            <SelectItem value="system">System</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-red-600 -mt-1 mr-2 hidden">
-          توضیحات ویدیو اجباریست
-        </p>
+          <p className="text-xs text-red-600 -mt-1 mr-2 hidden">
+            حداقل 3 برچسب برای ویدئوی خود انتخاب نمایید.
+          </p>
+        </div>
+      </div>
+
+      {/* Chips */}
+      <div className="flex gap-2 flex-wrap">
+        {tags.map((tag) => (
+          <Badge
+            key={tag}
+            variant="secondary"
+            className="flex items-center gap-1 px-2 py-1"
+          >
+            {tag}
+            <div className="cursor-pointer" onClick={() => removeTag(tag)}>
+              <X size={16} color="red" />
+            </div>
+          </Badge>
+        ))}
       </div>
 
       {/* فیلد  ذخیره در لیست پخش */}
@@ -155,7 +202,7 @@ export default function Form() {
         <Label className="text-black mr-2" htmlFor="description">
           ذخیره در لیست پخش
         </Label>
-        <Select value={saveInList} onValueChange={(val) => setSaveInList(val)}>
+        <Select onValueChange={(val) => onSendData({ saveInList: val })}>
           <Tooltip>
             <TooltipTrigger asChild>
               <SelectTrigger className="w-full" dir="rtl">
@@ -186,10 +233,7 @@ export default function Form() {
         <Label className="text-black mr-2" htmlFor="description">
           تنظیمات دیدگاه
         </Label>
-        <Select
-          value={commentSetting}
-          onValueChange={(val) => setCommentSetting(val)}
-        >
+        <Select onValueChange={(val) => onSendData({ commentSetting: val })}>
           <Tooltip>
             <TooltipTrigger asChild>
               <SelectTrigger className="w-full" dir="rtl">
