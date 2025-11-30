@@ -110,13 +110,15 @@ export function MenuBar() {
         if (typeof response != "string") {
           const users = [
             "username",
-            response.username,
+            response.user.username,
             "email",
-            response.email,
+            response.user.email,
             "mobile",
-            response.mobile,
+            response.user.mobile,
             "token",
-            response.token,
+            response.user.token,
+            "jwtToken",
+            response.jwtToken,
           ];
           window.location.replace("/");
           Helper.setStorages(users);

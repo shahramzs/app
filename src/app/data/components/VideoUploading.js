@@ -25,49 +25,57 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { useFile } from "@/components/component/FileContext";
+import { Helper } from "@/utils/Helper";
+import ApiService from "@/api/apiService";
 
 export default function VideoUploading({ video, data }) {
   const router = useRouter();
   const [videoURL, setVideoURL] = useState(null);
-  const [fileURL, setFileURL] = useState(null);
   const [autoPlay, setAutoPlay] = useState(false);
   const [publishTime, setPublishTime] = useState("");
   const [image, setImage] = useState("");
   const [subtitle, setSubtitle] = useState("");
+  const [token, setToken] = useState("");
+  const [jwtToken, setJwtToken] = useState("");
   const [enabled, setEnabled] = useState(false);
   const [progress, setProgress] = useState(0);
   const { file } = useFile();
 
+  const getTokenCookie = async () => {
+    setToken(await Helper.getStorage("token"));
+  };
+
+  const getJwtTokenCookie = async () => {
+    setJwtToken(await Helper.getStorage("jwtToken"));
+  };
+
   useEffect(() => {
-    if (!file) {
+    getTokenCookie();
+    getJwtTokenCookie();
+    let source = null;
+    if (video) {
+      source = video;
+    } else if (file) {
+      source = file;
+    } else {
       setVideoURL(null);
       router.push("upload/");
       return;
     }
 
-    if(!video){
-      setFileURL(null)
-      return
+    if (source instanceof File || source instanceof Blob) {
+      const url = URL.createObjectURL(source);
+      setVideoURL(url);
+      setAutoPlay(true);
+
+      return () => {
+        URL.revokeObjectURL(url);
+      };
     }
-
-    // مطمئن شو file instanceof File یا Blob باشد
-    if (!(file instanceof File || file instanceof Blob)) {
-      console.error("file is not a valid File or Blob", file);
-      setVideoURL(null);
-      return;
+    if (typeof source === "string") {
+      setVideoURL(source);
     }
-
-    const url = URL.createObjectURL(file);
-    setVideoURL(url);
-    setAutoPlay(true);
-
-    return () => {
-      URL.revokeObjectURL(url);
-      setVideoURL(null);
-    };
-  }, [file, router]);
-
-  console.log("file", file);
+  }, [video, file]);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -81,7 +89,26 @@ export default function VideoUploading({ video, data }) {
     }
   };
 
-  const submit = () => {};
+  const submit = () => {
+    ApiService.UploadingVideo(
+      data.title,
+      data.description,
+      data.category,
+      data.tag,
+      data.saveInList,
+      data.commentSetting,
+      videoURL,
+      image,
+      enabled,
+      subtitle,
+      publishTime,
+      token,
+      jwtToken,
+      (res) => {
+        console.log(res);
+      }
+    );
+  };
 
   return (
     <div className="flex flex-col w-full h-full gap-1">

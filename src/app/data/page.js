@@ -6,11 +6,9 @@ import VideoUploading from "./components/VideoUploading";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { useFile } from "@/components/component/FileContext";
 
 export default function Home() {
   const [cards, setCards] = useState([{ id: 1, video: null }]);
-  const { file } = useFile();
   const [dataForm, setDataForm] = useState({
     title: "",
     description: "",
