@@ -96,8 +96,8 @@ export default function VideoUploading({ video, data }) {
       data.category,
       data.tag,
       data.saveInList,
-      data.commentSetting,
-      videoURL,
+      data.commentSettings,
+      video ? video : file,
       image,
       enabled,
       subtitle,
@@ -105,7 +105,7 @@ export default function VideoUploading({ video, data }) {
       token,
       jwtToken,
       (res) => {
-        console.log(res);
+        console.log("responses", res);
       }
     );
   };

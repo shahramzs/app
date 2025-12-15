@@ -15,7 +15,7 @@ export default function Home() {
     category: "",
     tag: [],
     saveInList: "",
-    commentSetting: "",
+    commentSettings: "",
   });
 
   const handleAddCardClick = () => {
@@ -57,10 +57,7 @@ export default function Home() {
                   </div>
                   {/* ستون سمت چپ */}
                   <div className="md:col-span-2 flex flex-col w-full h-full items-center justify-center overflow-y-auto custom-scrollbar">
-                    <VideoUploading
-                      video={cardIndex.video}
-                      data={dataForm}
-                    />
+                    <VideoUploading video={cardIndex.video} data={dataForm} />
                   </div>
                 </div>
               </div>

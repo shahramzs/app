@@ -233,7 +233,7 @@ export default function Form({ onSendData }) {
         <Label className="text-black mr-2" htmlFor="description">
           تنظیمات دیدگاه
         </Label>
-        <Select onValueChange={(val) => onSendData({ commentSetting: val })}>
+        <Select onValueChange={(val) => onSendData({ commentSettings: val })}>
           <Tooltip>
             <TooltipTrigger asChild>
               <SelectTrigger className="w-full" dir="rtl">
