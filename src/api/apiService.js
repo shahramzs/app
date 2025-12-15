@@ -63,7 +63,8 @@ export default class ApiService {
     publishTime,
     token,
     jwtToken,
-    callback
+    callback,
+    progressValue
   ) {
     const formData = new FormData();
     formData.append("title", title);
@@ -83,6 +84,9 @@ export default class ApiService {
         .post(SERVERURL + "uploadVideo/", formData, {
           headers: {
             Authorization: jwtToken,
+          },
+          onUploadProgress: function (progressEvent) {
+            progressValue(progressEvent);
           },
         })
         .then((res) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useActionState } from "react";
 import ReactPlayer from "react-player";
 import { MoreVertical, Play, Delete, Upload } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -39,6 +39,8 @@ export default function VideoUploading({ video, data }) {
   const [jwtToken, setJwtToken] = useState("");
   const [enabled, setEnabled] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [showProgress, setShowProgress] = useState("hidden");
+  const [showProgressEvent, setShowProgressEvent] = useState("");
   const { file } = useFile();
 
   const getTokenCookie = async () => {
@@ -90,6 +92,7 @@ export default function VideoUploading({ video, data }) {
   };
 
   const submit = () => {
+    setShowProgress("block");
     ApiService.UploadingVideo(
       data.title,
       data.description,
@@ -106,15 +109,32 @@ export default function VideoUploading({ video, data }) {
       jwtToken,
       (res) => {
         console.log("responses", res);
+      },
+      (progressEvent) => {
+        setShowProgressEvent(progressEvent);
+        setProgress(
+          parseInt(
+            Math.round((progressEvent.loaded / progressEvent.total) * 100)
+          )
+        );
       }
     );
   };
+
+  const loadedMB = parseFloat(
+    (showProgressEvent.loaded / (1024 * 1024)).toFixed(2)
+  );
+  const totalMB = parseFloat(
+    (showProgressEvent.total / (1024 * 1024)).toFixed(2)
+  );
 
   return (
     <div className="flex flex-col w-full h-full gap-1">
       <div className="flex flex-row justify-between gap-3">
         <p className="text-xs text-red-600 mr-2 hidden">بارگزاری متوقف شده </p>
-        <p className="text-xs ml-2 hidden">29.59 مگ از 591.72 مگ</p>
+        <p className={`text-xs ml-2  ${showProgress}`}>
+          {loadedMB} -- {totalMB} مگابایت
+        </p>
       </div>
       <div className="w-full bg-black relative h-[170px]">
         {videoURL && (
@@ -149,14 +169,14 @@ export default function VideoUploading({ video, data }) {
         {/* نوار پیشرفت */}
         <Progress
           value={progress}
-          className="w-118 h-2 items-center justify-center "
+          className={`w-115 h-2 items-center justify-center ${showProgress}`}
         />
 
         {/* Tooltip سفارشی که روی نوار حرکت می‌کند */}
         <div
-          className="mt-9 absolute -translate-x-1/2 -translate-y-8 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow transition-all duration-300"
+          className={`mt-9  absolute -translate-x-1/2 -translate-y-8 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow transition-all duration-300 ${showProgress}`}
           style={{
-            left: `${progress}%`,
+            left: `${progress - 7}%`,
           }}
         >
           {progress}%
