@@ -6,9 +6,13 @@ import VideoUploading from "./components/VideoUploading";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import * as tus from "tus-js-client";
+import { startUpload } from "@/api/apiTus";
 
 export default function Home() {
-  const [cards, setCards] = useState([{ id: 1, video: null }]);
+  const [cards, setCards] = useState([
+    { id: 1, video: null, upload: null | tus.Upload, progress: 0 },
+  ]);
   const [dataForm, setDataForm] = useState({
     title: "",
     description: "",
@@ -28,6 +32,8 @@ export default function Home() {
     const newCard = {
       id: Date.now(),
       video: video,
+      upload: null,
+      progress: 0,
     };
     setCards([...cards, newCard]);
   };
@@ -57,7 +63,13 @@ export default function Home() {
                   </div>
                   {/* ستون سمت چپ */}
                   <div className="md:col-span-2 flex flex-col w-full h-full items-center justify-center overflow-y-auto custom-scrollbar">
-                    <VideoUploading video={cardIndex.video} data={dataForm} />
+                    <VideoUploading
+                      id={cardIndex.id}
+                      video={cardIndex.video}
+                      data={dataForm}
+                      setCards={setCards}
+                      cards={cards}
+                    />
                   </div>
                 </div>
               </div>

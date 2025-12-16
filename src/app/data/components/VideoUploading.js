@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useActionState } from "react";
 import ReactPlayer from "react-player";
-import { MoreVertical, Play, Delete, Upload } from "lucide-react";
+import { MoreVertical, Play, Delete, Upload, Pause } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
@@ -27,8 +27,16 @@ import { useRouter } from "next/navigation";
 import { useFile } from "@/components/component/FileContext";
 import { Helper } from "@/utils/Helper";
 import ApiService from "@/api/apiService";
+import {
+  pauseUpload,
+  resumeUpload,
+  uploadVideoWithTus,
+  startUpload,
+  tusUpload,
+  deleteUpload,
+} from "@/api/apiTus";
 
-export default function VideoUploading({ video, data }) {
+export default function VideoUploading({ id, video, data, setCards, cards }) {
   const router = useRouter();
   const [videoURL, setVideoURL] = useState(null);
   const [autoPlay, setAutoPlay] = useState(false);
@@ -40,7 +48,8 @@ export default function VideoUploading({ video, data }) {
   const [enabled, setEnabled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState("hidden");
-  const [showProgressEvent, setShowProgressEvent] = useState("");
+  const [toggle, setToggle] = useState(false);
+  const [videosToUpload, setVideosToUpload] = useState([]);
   const { file } = useFile();
 
   const getTokenCookie = async () => {
@@ -54,7 +63,9 @@ export default function VideoUploading({ video, data }) {
   useEffect(() => {
     getTokenCookie();
     getJwtTokenCookie();
+
     let source = null;
+
     if (video) {
       source = video;
     } else if (file) {
@@ -65,19 +76,51 @@ export default function VideoUploading({ video, data }) {
       return;
     }
 
-    if (source instanceof File || source instanceof Blob) {
-      const url = URL.createObjectURL(source);
-      setVideoURL(url);
-      setAutoPlay(true);
+    // ---------- preview ----------
+    let objectUrl = null;
 
-      return () => {
-        URL.revokeObjectURL(url);
-      };
-    }
-    if (typeof source === "string") {
+    if (source instanceof File || source instanceof Blob) {
+      objectUrl = URL.createObjectURL(source);
+      setVideoURL(objectUrl);
+      setAutoPlay(true);
+    } else if (typeof source === "string") {
       setVideoURL(source);
     }
-  }, [video, file]);
+
+    // ---------- ساخت لیست آپلود ----------
+    const list = [];
+
+    if (file) {
+      list.push({
+        id: 1,
+        file,
+        upload: null,
+        progress: 0,
+        status: "idle",
+      });
+    }
+
+    cards.forEach((card) => {
+      if (card.video) {
+        list.push({
+          id: card.id,
+          file: card.video,
+          upload: null,
+          progress: 0,
+          status: "idle",
+        });
+      }
+    });
+
+    setVideosToUpload(list);
+
+    // ---------- cleanup ----------
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [video, file, cards]);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -91,42 +134,157 @@ export default function VideoUploading({ video, data }) {
     }
   };
 
-  const submit = () => {
+  // const submit = () => {
+  //   setShowProgress("block");
+  //   ApiService.UploadingVideo(
+  //     data.title,
+  //     data.description,
+  //     data.category,
+  //     data.tag,
+  //     data.saveInList,
+  //     data.commentSettings,
+  //     video ? video : file,
+  //     image,
+  //     enabled,
+  //     subtitle,
+  //     publishTime,
+  //     token,
+  //     jwtToken,
+  //     (res) => {
+  //       console.log("responses", res);
+  //     },
+  //     (progressEvent) => {
+  //       setShowProgressEvent(progressEvent);
+  //       setProgress(
+  //         parseInt(
+  //           Math.round((progressEvent.loaded / progressEvent.total) * 100)
+  //         )
+  //       );
+  //     }
+  //   );
+  // };
+
+  const submit = async () => {
     setShowProgress("block");
-    ApiService.UploadingVideo(
-      data.title,
-      data.description,
-      data.category,
-      data.tag,
-      data.saveInList,
-      data.commentSettings,
-      video ? video : file,
-      image,
-      enabled,
-      subtitle,
-      publishTime,
-      token,
-      jwtToken,
-      (res) => {
-        console.log("responses", res);
-      },
-      (progressEvent) => {
-        setShowProgressEvent(progressEvent);
-        setProgress(
-          parseInt(
-            Math.round((progressEvent.loaded / progressEvent.total) * 100)
-          )
-        );
+    // let videoUrl = null;
+    try {
+      // if (file && video) {
+      //   const tusStartInUploading = await startUpload({
+      //     cardId: id,
+      //     file: video,
+      //     jwtToken: jwtToken,
+      //     onProgress: setProgress,
+      //     setCards: setCards,
+      //   });
+      //   videoUrl = tusStartInUploading;
+      // } else if (file && !video) {
+      //   const tusUploadUrl = await uploadVideoWithTus({
+      //     file: file,
+      //     jwtToken,
+      //     onProgress: setProgress,
+      //   });
+      //   videoUrl = tusUploadUrl;
+      // }
+
+      const uploadedUrls = [];
+      for (const videoItem of videosToUpload) {
+        const url = await tusUpload({
+          id: videoItem.id,
+          file: videoItem.file,
+          jwtToken,
+          setVideosToUpload,
+          onProgress: setProgress,
+        });
+        uploadedUrls.push(url);
       }
-    );
+
+      await ApiService.UploadingVideo(
+        data.title,
+        data.description,
+        data.category,
+        data.tag,
+        data.saveInList,
+        data.commentSettings,
+        uploadedUrls,
+        image,
+        enabled,
+        subtitle,
+        publishTime,
+        token,
+        jwtToken,
+        (res) => {
+          console.log("responses", res);
+        }
+      );
+
+      console.log("🎉 Upload + Save done");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const loadedMB = parseFloat(
-    (showProgressEvent.loaded / (1024 * 1024)).toFixed(2)
-  );
-  const totalMB = parseFloat(
-    (showProgressEvent.total / (1024 * 1024)).toFixed(2)
-  );
+  const loadedMB = parseFloat((progress.loaded / (1024 * 1024)).toFixed(2));
+  const totalMB = parseFloat((progress.total / (1024 * 1024)).toFixed(2));
+
+  const continueUploading = (id) => {
+    setToggle(false);
+    resumeUpload(id);
+  };
+
+  const stopUploading = (id) => {
+    setToggle(true);
+    pauseUpload(id);
+  };
+
+  const deleteVideo = (id) => {
+    deleteUpload(id);
+  };
+
+  function pauseUpload(id) {
+    setVideosToUpload((prev) =>
+      prev.map((v) => {
+        console.log("vid", v.id);
+        console.log("id", id);
+        console.log("upload id:", id, typeof id);
+        console.log("state id:", v.id, typeof v.id);
+        console.log("v.upload", v.upload);
+        if (v.id === id && v.upload) {
+          v.upload.abort(); // pause
+          return { ...v, status: "paused" };
+        }
+        return v;
+      })
+    );
+  }
+
+  function resumeUpload(id) {
+    setVideosToUpload((prev) =>
+      prev.map((v) => {
+        if (v.id === id && v.upload) {
+          v.upload.start(); // resume
+          return { ...v, status: "uploading" };
+        }
+        return v;
+      })
+    );
+  }
+
+  function deleteUpload(id) {
+    setVideosToUpload((prev) => {
+      const target = prev.find((v) => v.id === id);
+      if (target?.upload) {
+        // توقف + پاک‌کردن resumable data
+        target.upload.abort(true);
+      }
+      return prev.filter((v) => v.id !== id);
+    });
+    // اگر ویدئوی اصلی است
+    if (id === "main") {
+      setFile(null); // اگر setter داری
+    } else {
+      setCards((prev) => prev.filter((c) => c.id !== id));
+    }
+  }
 
   return (
     <div className="flex flex-col w-full h-full gap-1">
@@ -154,11 +312,29 @@ export default function VideoUploading({ video, data }) {
               <MoreVertical className="mt-1" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>
-                ادامه بارگزاری <Play />
+              <DropdownMenuItem
+                onClick={() => continueUploading(id)}
+                className={!toggle ? "hidden" : "block"}
+              >
+                <div className="flex flex-row gap-2">
+                  <p>ادامه بارگزاری</p>
+                  <Play />
+                </div>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                حذف ویدیو <Delete />
+              <DropdownMenuItem
+                onClick={() => stopUploading(id)}
+                className={!toggle ? "block" : "hidden"}
+              >
+                <div className="flex flex-row gap-2">
+                  <p>توقف بارگزاری</p>
+                  <Pause />
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => deleteVideo(id)}>
+                <div className="flex flex-row gap-2">
+                  <p> حذف ویدیو </p>
+                  <Delete />
+                </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -168,7 +344,7 @@ export default function VideoUploading({ video, data }) {
       <div className="w-96 relative mt-0.5">
         {/* نوار پیشرفت */}
         <Progress
-          value={progress}
+          value={progress.percent}
           className={`w-115 h-2 items-center justify-center ${showProgress}`}
         />
 
@@ -176,10 +352,10 @@ export default function VideoUploading({ video, data }) {
         <div
           className={`mt-9  absolute -translate-x-1/2 -translate-y-8 px-2 py-1 bg-gray-800 text-white text-xs rounded shadow transition-all duration-300 ${showProgress}`}
           style={{
-            left: `${progress - 7}%`,
+            left: `${progress.percent - 7}%`,
           }}
         >
-          {progress}%
+          {progress.percent}%
         </div>
       </div>
       <div className="mt-2">

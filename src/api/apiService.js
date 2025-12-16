@@ -49,6 +49,54 @@ export default class ApiService {
   }
 
   //Video Upload
+  // static async UploadingVideo(
+  //   title,
+  //   description,
+  //   category,
+  //   tag,
+  //   saveInList,
+  //   commentSettings,
+  //   file,
+  //   image,
+  //   waterMark,
+  //   subtitle,
+  //   publishTime,
+  //   token,
+  //   jwtToken,
+  //   callback,
+  //   progressValue
+  // ) {
+  //   const formData = new FormData();
+  //   formData.append("title", title);
+  //   formData.append("description", description);
+  //   formData.append("category", category);
+  //   formData.append("tag", tag);
+  //   formData.append("saveInList", saveInList);
+  //   formData.append("commentSettings", commentSettings);
+  //   formData.append("videoUrl", file);
+  //   formData.append("thumbImageUrl", image);
+  //   formData.append("waterMark", waterMark);
+  //   formData.append("subtitleUrl", subtitle);
+  //   formData.append("publishTime", publishTime);
+  //   formData.append("token", token);
+  //   try {
+  //     const response = await axios
+  //       .post(SERVERURL + "uploadVideo/", formData, {
+  //         headers: {
+  //           Authorization: jwtToken,
+  //         },
+  //         onUploadProgress: function (progressEvent) {
+  //           progressValue(progressEvent);
+  //         },
+  //       })
+  //       .then((res) => {
+  //         callback(res);
+  //       });
+  //   } catch (e) {
+  //     console.error("error onSignIn", e);
+  //   }
+  // }
+
   static async UploadingVideo(
     title,
     description,
@@ -63,8 +111,7 @@ export default class ApiService {
     publishTime,
     token,
     jwtToken,
-    callback,
-    progressValue
+    callback
   ) {
     const formData = new FormData();
     formData.append("title", title);
@@ -84,9 +131,6 @@ export default class ApiService {
         .post(SERVERURL + "uploadVideo/", formData, {
           headers: {
             Authorization: jwtToken,
-          },
-          onUploadProgress: function (progressEvent) {
-            progressValue(progressEvent);
           },
         })
         .then((res) => {
