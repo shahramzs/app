@@ -140,10 +140,12 @@ export function tusUpload({
   id,
   file,
   jwtToken,
+  uploadsRef, 
   setVideosToUpload,
   onProgress,
 }) {
-  console.log("upload instance created for id:", id);
+  console.log("tusUpload called for id:", id);
+
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {
       endpoint: SERVERURL + "uploads",
@@ -159,7 +161,8 @@ export function tusUpload({
       },
 
       onProgress(bytesUploaded, bytesTotal) {
-        const percent = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+        const percent = Math.floor((bytesUploaded / bytesTotal) * 100);
+
         onProgress?.({
           loaded: bytesUploaded,
           total: bytesTotal,
@@ -174,31 +177,37 @@ export function tusUpload({
       },
 
       onSuccess() {
+        console.log("✅ Upload finished for id:", id);
+
+        // حذف instance بعد از اتمام
+        uploadsRef.current.delete(id);
+
         setVideosToUpload((prev) =>
           prev.map((v) => (v.id === id ? { ...v, status: "done" } : v))
         );
+
         resolve(upload.url);
       },
 
       onError(error) {
+        console.error("❌ Upload error for id:", id, error);
         reject(error);
       },
     });
 
-    upload.start();
+    // 🔑 ذخیره instance در ref (نه state)
+    uploadsRef.current.set(id, upload);
 
-    // ذخیره upload instance
-    setVideosToUpload((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, upload } : v))
+    console.log(
+      "Upload instance stored in ref for id:",
+      id,
+      uploadsRef.current.get(id)
     );
+
+    setVideosToUpload((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, status: "uploading" } : v))
+    );
+
+    upload.start();
   });
 }
-
-// کنترل‌ها
-// export function pauseUpload() {
-//   if (upload) upload.abort();
-// }
-
-// export function resumeUpload() {
-//   if (upload) upload.start();
-// }

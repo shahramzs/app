@@ -67,7 +67,6 @@ export default function Home() {
                       id={cardIndex.id}
                       video={cardIndex.video}
                       data={dataForm}
-                      setCards={setCards}
                       cards={cards}
                     />
                   </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useActionState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ReactPlayer from "react-player";
 import { MoreVertical, Play, Delete, Upload, Pause } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -36,7 +36,7 @@ import {
   deleteUpload,
 } from "@/api/apiTus";
 
-export default function VideoUploading({ id, video, data, setCards, cards }) {
+export default function VideoUploading({ id, video, data, cards }) {
   const router = useRouter();
   const [videoURL, setVideoURL] = useState(null);
   const [autoPlay, setAutoPlay] = useState(false);
@@ -51,6 +51,7 @@ export default function VideoUploading({ id, video, data, setCards, cards }) {
   const [toggle, setToggle] = useState(false);
   const [videosToUpload, setVideosToUpload] = useState([]);
   const { file } = useFile();
+  const uploadsRef = useRef(new Map());
 
   const getTokenCookie = async () => {
     setToken(await Helper.getStorage("token"));
@@ -90,22 +91,22 @@ export default function VideoUploading({ id, video, data, setCards, cards }) {
     // ---------- ساخت لیست آپلود ----------
     const list = [];
 
+    // ویدئوی اصلی
     if (file) {
       list.push({
-        id: 1,
+        id: "main", // 🔑 id یکتا و ثابت
         file,
-        upload: null,
         progress: 0,
         status: "idle",
       });
     }
 
+    // ویدئوهای کارت‌ها
     cards.forEach((card) => {
       if (card.video) {
         list.push({
-          id: id,
+          id: `card-${card.id}`, // 🔑 جلوگیری از تداخل
           file: card.video,
-          upload: null,
           progress: 0,
           status: "idle",
         });
@@ -166,36 +167,24 @@ export default function VideoUploading({ id, video, data, setCards, cards }) {
 
   const submit = async () => {
     setShowProgress("block");
-    // let videoUrl = null;
     try {
-      // if (file && video) {
-      //   const tusStartInUploading = await startUpload({
-      //     cardId: id,
-      //     file: video,
-      //     jwtToken: jwtToken,
-      //     onProgress: setProgress,
-      //     setCards: setCards,
-      //   });
-      //   videoUrl = tusStartInUploading;
-      // } else if (file && !video) {
-      //   const tusUploadUrl = await uploadVideoWithTus({
-      //     file: file,
-      //     jwtToken,
-      //     onProgress: setProgress,
-      //   });
-      //   videoUrl = tusUploadUrl;
-      // }
-
       const uploadedUrls = [];
       for (const videoItem of videosToUpload) {
+        // اگر قبلاً آپلود شده، ردش کن
+        if (videoItem.status === "done") continue;
         const url = await tusUpload({
           id: videoItem.id,
           file: videoItem.file,
           jwtToken,
+          uploadsRef, // 👈 مهم
           setVideosToUpload,
           onProgress: setProgress,
         });
-        uploadedUrls.push(url);
+
+        uploadedUrls.push({
+          id: videoItem.id,
+          url,
+        });
       }
 
       await ApiService.UploadingVideo(
@@ -205,7 +194,7 @@ export default function VideoUploading({ id, video, data, setCards, cards }) {
         data.tag,
         data.saveInList,
         data.commentSettings,
-        uploadedUrls,
+        uploadedUrls, // 👈 آرایه‌ی امن
         image,
         enabled,
         subtitle,
@@ -219,7 +208,7 @@ export default function VideoUploading({ id, video, data, setCards, cards }) {
 
       console.log("🎉 Upload + Save done");
     } catch (err) {
-      console.error(err);
+      console.error("❌ submit error:", err);
     }
   };
 
@@ -241,49 +230,40 @@ export default function VideoUploading({ id, video, data, setCards, cards }) {
   };
 
   function pauseUpload(id) {
-    setVideosToUpload((prev) =>
-      prev.map((v) => {
-        console.log("vid", v.id);
-        console.log("id", id);
-        console.log("upload id:", id, typeof id);
-        console.log("state id:", v.id, typeof v.id);
-        console.log("v.upload", v.upload);
-        if (v.id === id && v.upload) {
-          v.upload.abort(); // pause
-          return { ...v, status: "paused" };
-        }
-        return v;
-      })
-    );
+    const upload = uploadsRef.current.get(id);
+    if (upload) {
+      upload.abort();
+      setVideosToUpload((prev) =>
+        prev.map((v) => (v.id === id ? { ...v, status: "paused" } : v))
+      );
+      console.log("Paused upload for id:", id);
+    }
   }
 
   function resumeUpload(id) {
-    setVideosToUpload((prev) =>
-      prev.map((v) => {
-        if (v.id === id && v.upload) {
-          v.upload.start(); // resume
-          return { ...v, status: "uploading" };
-        }
-        return v;
-      })
-    );
+    const upload = uploadsRef.current.get(id);
+    if (upload) {
+      upload.start();
+      setVideosToUpload((prev) =>
+        prev.map((v) => (v.id === id ? { ...v, status: "uploading" } : v))
+      );
+      console.log("Resumed upload for id:", id);
+    }
   }
 
   function deleteUpload(id) {
-    setVideosToUpload((prev) => {
-      const target = prev.find((v) => v.id === id);
-      if (target?.upload) {
-        // توقف + پاک‌کردن resumable data
-        target.upload.abort(true);
-      }
-      return prev.filter((v) => v.id !== id);
-    });
-    // اگر ویدئوی اصلی است
+    const upload = uploadsRef.current.get(id);
+    if (upload) {
+      upload.abort(true); // توقف + پاک‌کردن resumable data
+      uploadsRef.current.delete(id);
+    }
+    setVideosToUpload((prev) => prev.filter((v) => v.id !== id));
     if (id === "main") {
       setFile(null); // اگر setter داری
     } else {
-      setCards((prev) => prev.filter((c) => c.id !== id));
+      setCards((prev) => prev.filter((c) => `card-${c.id}` !== id));
     }
+    console.log("Deleted upload for id:", id);
   }
 
   return (
