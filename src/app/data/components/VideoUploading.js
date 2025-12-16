@@ -103,7 +103,7 @@ export default function VideoUploading({ id, video, data, setCards, cards }) {
     cards.forEach((card) => {
       if (card.video) {
         list.push({
-          id: card.id,
+          id: id,
           file: card.video,
           upload: null,
           progress: 0,
